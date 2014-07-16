@@ -1,0 +1,55 @@
+package com.assigment3.picturedownloader;
+
+import android.app.Activity;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+public class PictureDownloaderActivity extends Activity implements OnClickListener{
+
+	private AsyncPictureDownloader loader;
+	private TextView statusText;
+	private ProgressBar progressBar;
+	private Button downloaderButton;
+	
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.picture_downloader_layout);
+        statusText = (TextView)findViewById(R.id.status_text);
+        downloaderButton = (Button)findViewById(R.id.picture_button);
+    }
+
+	@Override
+	public void onClick(View v) {
+		
+	}
+	private class AsyncPictureDownloader extends AsyncTask<String, Integer, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			statusText.setText("Status: Downloading");
+		}
+
+		@Override
+		protected Void doInBackground(String... params) {
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			statusText.setText("Status: Downloaded");
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+		}
+	}
+}

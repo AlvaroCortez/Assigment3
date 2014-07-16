@@ -1,0 +1,175 @@
+package com.assigment3.picturedownloader;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class PictureDownloaderActivity extends Activity implements
+		OnClickListener {
+
+	private static AsyncPictureDownloader loader;
+	private TextView statusText;
+	private ProgressBar downloadProgress;
+	private Button downloaderButton;
+	private String url;
+	private static final int MAX = 100;
+	private static final int ZERO = 0;
+	private static final String pathSave = "/sdcard/downloadedPicture.jpg";
+
+	@SuppressWarnings("deprecation")
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.picture_downloader_layout);
+		statusText = (TextView) findViewById(R.id.status_text);
+		downloaderButton = (Button) findViewById(R.id.picture_button);
+		downloadProgress = (ProgressBar) findViewById(R.id.progress_downloader);
+		downloadProgress.setVisibility(View.INVISIBLE);
+		downloadProgress.setMax(MAX);
+		downloadProgress.setProgress(ZERO);
+		url = getString(R.string.image_url);
+		loader = (AsyncPictureDownloader) getLastNonConfigurationInstance();
+		if (loader == null) {
+			loader = new AsyncPictureDownloader();
+		}
+		loader.link(this);
+	}
+	
+	public void onStart(){
+		super.onStart();
+		switch(loader.getStatus()){
+		case PENDING:
+			statusText.setText("Status: Idle");
+			downloaderButton.setVisibility(View.VISIBLE);
+			downloaderButton.setText("Download");
+			downloadProgress.setVisibility(View.INVISIBLE);
+			break;
+		case FINISHED:
+			statusText.setText("Status: Downloaded");
+			downloaderButton.setVisibility(View.VISIBLE);
+			downloaderButton.setText("Open");
+			downloadProgress.setVisibility(View.INVISIBLE);
+			break;
+		case RUNNING:
+			statusText.setText("Status: Downloading");
+			downloaderButton.setVisibility(View.INVISIBLE);
+			downloadProgress.setVisibility(View.VISIBLE);
+			break;
+		default:
+			break;
+		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		if (downloaderButton.getText().equals("Open")) {
+			Intent image = new Intent();
+			image.setAction(Intent.ACTION_VIEW);
+			File file = new File(pathSave);
+			image.setDataAndType(Uri.fromFile(file), "image/*");
+			startActivity(image);
+		} else {
+			loader.execute(url);
+		}
+	}
+
+	public Object onRetainNonConfigurationInstance() {
+		loader.unLink();
+		return loader;
+	}
+
+	private static class AsyncPictureDownloader extends
+			AsyncTask<String, Integer, Void> {
+
+		PictureDownloaderActivity activity;
+		boolean error = false;
+
+		void link(PictureDownloaderActivity act) {
+			activity = act;
+		}
+
+		void unLink() {
+			activity = null;
+		}
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			activity.statusText.setText("Status: Downloading");
+			activity.downloaderButton.setVisibility(View.INVISIBLE);
+			activity.downloadProgress.setVisibility(View.VISIBLE);
+			activity.downloadProgress.setProgress(ZERO);
+		}
+
+		@Override
+		protected Void doInBackground(String... params) {
+			int count = ZERO;
+			try {
+				URL url = new URL(params[0]);
+				URLConnection urlConnection = url.openConnection();
+				urlConnection.connect();
+				int lenghtFile = urlConnection.getContentLength();
+				InputStream input = new BufferedInputStream(url.openStream(),
+						8192);
+				OutputStream output = new FileOutputStream(pathSave);
+				byte data[] = new byte[1024];
+				long total = ZERO;
+				while ((count = input.read(data)) != -1) {
+					total += count;
+					publishProgress((int) ((total * MAX) / lenghtFile));
+					output.write(data, ZERO, count);
+				}
+				output.flush();
+				output.close();
+				input.close();
+			} catch (IOException e) {
+				Toast.makeText(activity, "Error" + e + ", try again",
+						Toast.LENGTH_LONG).show();
+				error = true;
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			if (error) {
+				loader = new AsyncPictureDownloader();
+				activity.statusText.setText("Status: Idle");
+				init();
+			} else {
+				activity.statusText.setText("Status: Downloaded");
+				init();
+			}
+		}
+		
+		protected void init(){
+			activity.downloaderButton.setVisibility(View.VISIBLE);
+			activity.downloaderButton.setText("Open");
+			activity.downloadProgress.setVisibility(View.INVISIBLE);
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+			activity.downloadProgress.setProgress(values[0]);
+		}
+	}
+}

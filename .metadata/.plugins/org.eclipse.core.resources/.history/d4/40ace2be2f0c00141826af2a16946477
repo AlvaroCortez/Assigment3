@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">PictureDownloader</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="image_url">http://thebrightsideofdepression.files.wordpress.com/2014/02/rainbow-eye-2-eyes-14801295-1024-768.jpg</string>
+
+</resources>

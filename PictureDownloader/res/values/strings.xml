@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">PictureDownloader</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="image_url">http://m.io.ua/img_aa/medium/0192/63/01926395.jpg</string>
+    <string name="picture_downloader">Picture downloader</string>
+    <string name="status_downloader">Status: Idle</string>
+    <string name="button_downloader">Download</string>
+
+</resources>

@@ -1,0 +1,87 @@
+package com.assigment3.picturedownloader;
+
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
+
+import android.app.Activity;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+public class PictureDownloaderActivity extends Activity implements OnClickListener{
+
+	private AsyncPictureDownloader loader;
+	private TextView statusText;
+	private ProgressBar downloadProgress;
+	private Button downloaderButton;
+	private String url;
+	private static final int MAX = 100;
+	private static final int ZERO = 0;
+	
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.picture_downloader_layout);
+        statusText = (TextView)findViewById(R.id.status_text);
+        downloaderButton = (Button)findViewById(R.id.picture_button);
+        downloadProgress = (ProgressBar)findViewById(R.id.progress_downloader);
+        downloadProgress.setVisibility(View.INVISIBLE);
+        downloadProgress.setMax(MAX);
+        downloadProgress.setProgress(ZERO);
+        url = getString(R.string.image_url);
+    }
+
+	@Override
+	public void onClick(View v) {
+		loader = new AsyncPictureDownloader();
+		loader.execute(url);
+	}
+	private class AsyncPictureDownloader extends AsyncTask<String, Integer, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			statusText.setText("Status: Downloading");
+			downloaderButton.setVisibility(View.INVISIBLE);
+			downloadProgress.setVisibility(View.VISIBLE);
+		}
+
+		@Override
+		protected Void doInBackground(String... params) {
+			try{
+				URL url = new URL(params[0]);
+			    URLConnection urlConnection = url.openConnection();
+			    urlConnection.connect();
+			    int lenght = urlConnection.getContentLength();
+			} catch (IOException e){
+				
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			statusText.setText("Status: Downloaded");
+			downloaderButton.setVisibility(View.VISIBLE);
+			downloaderButton.setText("Open");
+			downloadProgress.setVisibility(View.INVISIBLE);
+			
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+		}
+
+		@Override
+		protected void onCancelled() {
+			super.onCancelled();
+		}
+	}
+}
